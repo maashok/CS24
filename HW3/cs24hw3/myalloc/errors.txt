@@ -1,0 +1,59 @@
+(a)
+(i) If the programmer calls myfree() on an address that didn't
+    originate from myalloc(), then the allocator still attempts to
+    free it. It does this by changing the value 3 bytes back to a zero
+    as long as it isn't a zero already. Then, it will try to coalesce
+    the blocks before and after this block, by looking at whatever value
+    is in the 2 bytes before the old pointer to find the "size" of
+    this block and 5 bytes before the old pointer to find the "size" of
+    the previous block. Using this, it will try to coalesce the blocks
+    only if the values where the header flags would be of these previous and
+    next blocks is zero, to signify they are free.
+
+    Thus, it is unlikely that surrounding blocks of memory will be affected
+    as there is a small chance that the bytes where the flags of those
+    should be will zero. Thus, the only byte that will definitiely be affected
+    is the one 3 bytes before the pointer passed in, which will be changed
+    to zero.
+
+(ii) If the programmer calls myfree() on an address that is contained
+     within a memory block returned by myalloc(), the program will respond
+     the same way it did to case (i) above, changing the the value 3 bytes
+     back to a zero (unless it already is, in which case it aborts).
+
+     Then, it tries to find the header and footer of the previous and
+     next blocks (based on whatever data is in the memory
+     specified number of bytes from the pointer passed in). With that,
+     if the first byte of the header is zero, meaning the block is free,
+     the program tries to coalesce the block of the pointer passed in
+     and whatever block it thinks surrounds it and is free.
+
+(iii) If the programmer calls myfree() on an address that has already
+      been freed, then the program aborts, providing an error message
+      that the programmer is "Freeing memory that has already been
+      freed". This is found by seeing if the flag in the header of this
+      memory block already says the block is free (already equal to zero).
+
+(b)
+(i) To prevent freeing memory that did not originate from myalloc() the
+allocator could check whether the pointer passed in is within the bounds
+of the memory pool. It would do this by seeing if the pointer is within
+the range of the pointer pointing to the memory pool (the first byte of it)
+and the end of the memory pool (pointer pointing to first byte + size of
+pool).
+
+If it is not, then we would print a message saying that we can't free memory
+we didn't allocate and terminate.
+
+(ii) To prevent freeing memory within some memory block returned, we could
+keep a list of the addresses returned by myalloc, as a linked list of all
+the memory blocks that have already been allocated. Then, when we receive
+a pointer to free in myfree(), we would just check whether the pointer passed
+in is identical to any pointer we have saved as having allocated, in which
+case the pointer passed in pointing to the start of the block.
+
+Otherwise, we notify the user that they are not trying to free
+the exact pointer they received and terminate.
+
+(iii) To prevent double free errors, we would just check if the memory block
+has already been freed, as explained in part a.

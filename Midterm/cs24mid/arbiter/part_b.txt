@@ -1,0 +1,26 @@
+The processor will take 4/3 of the time it took with the original processor
+even if each load/store operation only took 2 clock cycles.
+For an array length of 100, the original processor would take about 900
+clock cycles 9 instructions in each iteration of the loop, with one clock
+cycle per instruction).
+
+Now, even if each of the 3 load and store operations takes just 1 extra
+clock cycle to complete, the multiprocessor computer with the bus arbiter
+will take about 1200 clock cycles. (12 clock cycles per iteration of the
+loop). If instead, the load/store operations take even more extra clock
+cycles, the total number of clock cycles will become even larger, taking
+1500 clock cycles in total.
+
+If both CPUs in the multi - processor are executing the same program, the
+performance could take twice as long, in the worst case. This worst case
+would be if both processors keep requesting  memory at the same time,
+such that when one gets access to the bus arbiter, the other has to wait.
+This is assuming that the processors do not take much time for any other
+operations, which is reasonable considering that if each load/store
+operation takes 4 clock cycles, these 3 operations together would take
+12 clock cycles while the other instructions would only take 6 clock cycles
+total.
+
+In this case, both processors keep requesting memory at the same time and
+each one has to wait at some point, essentially doubling the time to
+complete the program.

@@ -1,0 +1,12 @@
+/* Push the address of the object (Shape_Data type)
+   onto the stack */
+push    8(%ebp)
+/* Access this address and store the Shape_Class
+   address into %eax */
+mov    8(%ebp), %eax
+/* Access the memory at the address stored in
+   %eax and store the function pointer in %edx
+mov    (%eax), %edx
+/* Call the function getVolume by accessing
+   the memory at the function pointer stored in %edx */
+call    (%edx)

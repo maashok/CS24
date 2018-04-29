@@ -1,0 +1,39 @@
+The program could be modified to use BLK and BUN instructions by
+enclosing 4 of the lines in these instructions, such that the program
+looked like this:
+
+    BZ R2, EndLoop
+Loop:
+    BLK
+    LD R0, R3
+    LD R1, R4
+    ADD R3, R4, R4
+    ST R5, R7
+    BUN
+    INC R0
+    ...
+
+While there is an instruction that does not involve the bus arbiter
+included in the lock, locking the arbiter for this one extra clock cycle
+is better than having to request access to the arbiter again for the
+store operaition, which will then take extra clock cycles.
+
+In the case where a single CPU is running the program, the program will
+take 13 clock cycles per iteration of the loop if each BLK/BUN operation
+takes 2 cycles to complete. However, if they instead take 3 cycles, the
+program will take 15 clock cycles per iteration. Similarly, for each
+extra cycle the BLK/BUN operation takes, the program takes 2 extra clock
+cycles. However, in the old performance, increasing the clock cycles per
+operation made the program take 3 extra clock cycles per iteration. Thus,
+if these bus arbiter operations take more than 4 clock cycles per instruction,
+the BLK/BUN instructions can make the program perform faster.
+
+If both CPUs are running the program, the program can also run faster since
+the "top half" of the loop with the bus arbiter operations will take half
+the time and the "bottom half" of the loop with regular instructions will take
+half the time. That way, when one CPU is interacting with the bus arbiter
+on the "top half", the other CPU will complete its instructions in the "bottom
+half". This way, the CPUs are sharing the bus arbiter such that neither of
+them fully blocks out the other for too long. They also won't both keep
+requesting the arbiter at the same time as much, since they only need to
+request it once rather than 3 times per loop.

@@ -1,0 +1,26 @@
+Practice Problem 2.46
+
+A. Binary representation of 0.1 - x
+  0.000110011001100110011001100110011[0011]...
+- 0.00011001100110011001100
+= 0.00000000000000000000000[1100]...
+
+B. Approximate Decimal value of 0.1 - x
+dec(0.1 - x) = 1*2^-24 + 1*2^-25 + 0*2^-26 + 0*2^-27 + 1*2^-28 + 1*2^-29 + ...
+= 5.96*10^-8 + 2.98*10^-8 + 3.73*10^-9 + 1.86*10^-9 + ...
+= 9.50 * 10^-8
+
+C. The number of seconds that have passed = 100 hrs * 60 min/hr * 60 sec/min
+     = 360,000 seconds
+     
+     Number of times counter has been incremented = 3,600,000
+     
+     Actual time = 3,600,000 * 0.1
+     
+     Computed time = 3,600,000 * x
+     
+     Actual time - Computed Time = 3,600,000*(0.1 - x) = 0.342 seconds
+     
+D. D = v*t
+   D = 2000 m/s * 0.342 s
+     = 684 m

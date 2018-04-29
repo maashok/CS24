@@ -1,0 +1,23 @@
+n = n & (n-1)
+
+This expression removes the rightmost one bit from n.
+
+This is because if the rightmost bit of n is 1, then n-1 will have a rightmost
+bit of zero. Thus, and-ing n and n-1 will remove the rightmost one bit of n, as
+1 & 0 = 0 (for rightmost bit).
+
+However, if the rightmost bit of n is not 1, then calculating n - 1 will involve
+borrowing from the first digit as you go left that is a 1. When borrowing, that
+digit will then become a 0 in n, as we need to bring that digit to the rightmost bit
+to subtract one from it. At the same time, that bit to the left that we borrowed from
+will have zero subtracted from it in finding n-1, So in n-1, that bit will be a zero.
+Then when and-ing n and n-1, the rightmost bit that is a 1 will be masked, as n-1
+has a zero in that place, and thus the rightmost one bit is removed.
+
+This can provide a faster way to count one-bits in a value, since we can just
+remove the one bits one by one until n is zero, at which point there are no more
+one-bits. However many times we remove a one bit using the expression is how
+many one-bits there are in n in the first place. This is also much faster, since
+it doesn't involve any masks or shifting, only a simple binary and for each one bit.
+We also don't need to go through all the bits (regardless of whether they are zero
+or one) in the while loop, as we need to do in the shifting/masking method.

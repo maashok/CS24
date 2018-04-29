@@ -1,0 +1,39 @@
+Answers for the "Arrays, Pointer Arithmetic, and Structs" section of CS24 HW3:
+
+
+1.
+From p[0] to p[15]
+0th byte  - 0x00
+1st byte  - 0x00
+2nd byte  - 0x00
+3rd byte  - 0xEF
+4th byte  - 0xBE
+5th byte  - 0xAD
+6th byte  - 0xDE
+7th byte  - 0x00
+8th byte  - 0x00
+9th byte  - 0x00
+10th byte - 0x00
+11th byte - 0x00
+12th byte - 0xBE
+13th byte - 0xBA
+14th byte - 0xFE
+15th byte - 0xCA
+
+2.
+Member	Offset	  Size
+id      0 bytes	  4 bytes
+code    4 bytes	  5 bytes
+next    12 bytes  4 bytes
+
+The total size of the struct in memory is 16 bytes.
+There are 3 unused bytes as padding after code.
+
+3. offset = 71
+
+This is because each member of the array is 16 bytes, so 4 entry structs
+will take 64 bytes of memory (0 - 63). Then, the id of the 5th struct will
+take 4 bytes, bringing us to 68 bytes (0 - 67). The 4th element of
+the character array will be 4 bytes in, taking 72 bytes, or from 0 - 71.
+
+Thus, if offset is 71 the two lines will write to the same byte.

@@ -1,0 +1,40 @@
+==3252== Memcheck, a memory error detector
+==3252== Copyright (C) 2002-2013, and GNU GPL'd, by Julian Seward et al.
+==3252== Using Valgrind-3.10.1 and LibVEX; rerun with -h for copyright info
+==3252== Command: ./scheme24
+==3252== 
+==3252== Stack overflow in thread 1: can't grow stack to 0xbe629ffc
+==3252== 
+==3252== Process terminating with default action of signal 11 (SIGSEGV)
+==3252==  Access not within mapped region at address 0xBE629FFC
+==3252==    at 0x8049E6B: mark_lambda (alloc.c:249)
+==3252==  If you believe this happened as a result of a stack
+==3252==  overflow in your program's main thread (unlikely but
+==3252==  possible), you can try to increase the size of the
+==3252==  main thread stack using the --main-stacksize= flag.
+==3252==  The main thread stack size used in this run was 8388608.
+==3252== Stack overflow in thread 1: can't grow stack to 0xbe629ff8
+==3252== 
+==3252== Process terminating with default action of signal 11 (SIGSEGV)
+==3252==  Access not within mapped region at address 0xBE629FF8
+==3252==    at 0x4024530: _vgnU_freeres (in /usr/lib/valgrind/vgpreload_core-x86-linux.so)
+==3252==  If you believe this happened as a result of a stack
+==3252==  overflow in your program's main thread (unlikely but
+==3252==  possible), you can try to increase the size of the
+==3252==  main thread stack using the --main-stacksize= flag.
+==3252==  The main thread stack size used in this run was 8388608.
+==3252== 
+==3252== HEAP SUMMARY:
+==3252==     in use at exit: 2,807 bytes in 128 blocks
+==3252==   total heap usage: 136 allocs, 8 frees, 3,375 bytes allocated
+==3252== 
+==3252== LEAK SUMMARY:
+==3252==    definitely lost: 0 bytes in 0 blocks
+==3252==    indirectly lost: 0 bytes in 0 blocks
+==3252==      possibly lost: 0 bytes in 0 blocks
+==3252==    still reachable: 2,807 bytes in 128 blocks
+==3252==         suppressed: 0 bytes in 0 blocks
+==3252== Rerun with --leak-check=full to see details of leaked memory
+==3252== 
+==3252== For counts of detected and suppressed errors, rerun with: -v
+==3252== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

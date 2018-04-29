@@ -1,0 +1,21 @@
+Accumulator Implementation
+==========================
+
+My accumulator implementation is lock-free. It is possible for
+a thread to take an unbounded number of steps to complete an
+add_to_accum() operation. This could happen if a thread sums
+up *accum and value and stores it in temp. However, another
+thread gets CPU time then and it changes the value of the
+accumulator. So, when the original thread gets CPU time again
+it has to recalculate the new sum with the new value of
+the accumulator. However, if again, a different thread gets
+CPU time before the next compare_and_swap operation occurs,
+that thread may change the value of the accumulator by that
+time, causing the value to become invalid again. This can
+happen indefinitely if the thread-scheduling causes it, such
+that a thread never gets a chance to finish, since each time
+it tries to add a value, a different thread completes its own
+add, making the value of the add in this thread invalid.
+Thus, it may never return the new value of the accumulator
+from this thread.
+

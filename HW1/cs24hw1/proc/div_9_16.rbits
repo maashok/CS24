@@ -1,0 +1,8 @@
+9  # 0: Dividend = 9
+10 # 1: Divisor = 16
+0  # 2: Tmp1, will store result of logical right shift of remainder
+0  # 3: Tmp2, will store result of arithmetic right shift of remainder
+0  # 4: Tmp3, will store result of Tmp1 - Tmp2
+1  # 5: Constant, store value 1
+0  # 6: Quotient
+0  # 7: Remainder

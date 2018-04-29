@@ -1,0 +1,42 @@
+a)
+
+For a 3 GHz : 1 clock = 0.3 ns
+
+Hit time = 1 clock
+Miss penalty = 100 clocks
+
+(1 - miss rate) * 1 clock + (miss rate) * 100 clocks = # clocks/access
+
+750 million data accesses per second
+= 750 million/10^9 data accesses per nanosecond
+= 750 x 10^6 / 10^9 * 0.3 data accesses per clock
+= .225 data accesses per clock
+
+0.225 data accesses are done per clock, or each data acccess
+gets 1/0.225 = 4.444 clocks per data access.
+Plugging back in,
+
+4.444 clocks per data access = 1 - m + 100m = 99m + 1
+
+m = 0.0348
+
+There is a miss rate of 3.48%
+
+b)
+
+If you double the performance (instructions per second), since each
+instruction needs 1 data value, you also end up the number
+of data accesses per second, and the number of data accesses per
+clock.
+
+Thus, the number of clocks per data access is halved, to
+2.222 clocks per data access. Plugging back in again,
+
+2.222 clocks per data access = 99m + 1
+
+m = 0.0123
+
+So, the miss rate should be 1.23%
+
+So you should reduce the cache miss rate by about 65% of the
+current miss rate, reducing the miss rate from 3.48% to 1.23%.

@@ -1,0 +1,23 @@
+Random Replacement Policy
+
+d)Direct mapped cache
+
+./heaptest 32:256:1
+Cache miss rate = 2.40%
+
+e)Fully associative cache
+
+./heaptest 32:1:256
+Cache miss rate = 2.45%
+
+Least Used Replacement Policy
+g)
+Direct Mapped Cache
+
+./heaptest 32:256:1
+Cache miss rate = 2.40%
+
+Fully Associative Cache
+
+./heaptest 32:1:256
+Cache miss rate = 2.26%

@@ -1,0 +1,142 @@
+Problem 3
+
+1) This behavior will not cause allocation failures due to
+memory fragmentation, since the allocation requests are generally
+of the same size and are used for similar amounts of time.
+
+Thus, since the requests are generally of the same size, a new
+request will use the recently freed memory of another block,
+and not have problems with needing more memory than that block
+provides. And since the requests are generally used for
+similar amounts of time, there will likely not be a problem
+with needing a lot of memory all at the same time, and there
+will always be a block recently freed that we can use
+when we want to allocate a new block.
+
+2) One inefficiency that could be produced is that data stored
+could be fragmented among these many blocks, so that reading
+some amount of data involves more operations than just incrementing
+from one index to the next. Instead, we may need to jump from
+the end of one block to the next small block.
+
+In addition, there may be an inefficiency in storing these
+blocks. Normally, there is a header to each block of memory as
+well as padding at the end. If there are many small blocks, each
+block will still include these parts, so more of the total memory
+goes into headers and padding, which can't store data. On the
+other hand, if there are a few small blocks, there are fewer
+headers and paddings, since each block only needs one of these
+and there are fewer blocks in total. Thus, the total memory
+capacity may not be used efficiently.
+
+3) One benefit that arises from this small object allocator is that
+if we make multiple small object requests to use for the same purpose,
+the memory for these objects will be adjacent, as they were allocated
+in a first fit strategy from the same chunk of memory, and none of
+the memory is freed until all the objects have been released. Thus,
+it is possible to traverse between small objects through pointer
+arithmetic as well. However, the general purpose heap allocator may
+not have done this, as we can not predict whether two allocation
+requests made one after the other return adjacent memory blocks.
+
+Another benefit is that if a chunk is still in use, and we decide
+later that we want a small object that we released, we can reclaim
+the data in it as long as we still have the pointer. Since the memory
+is not actually reclaimed, the object still exists in the chunk
+at the same location and has not been reused. However, this would
+not be possible with the general purpose allocator, since after
+we free memory, we can not say what happens to the chunk of memory.
+It may still be free, or it could have been reused for some other
+purpose.
+
+However, one main issue is that we use our total memory inefficiently.
+If we have a chunk and even have released every small object except for
+one, the chunk's memory has not been freed, and the memory still can't be
+reused. Thus, we would have received a large amount of memory from
+the heap allocator, and would only be able to use about 100 bytes of it
+even though most of the memory was free to use. This is very inefficient
+use, and would call for more heap allocations than necessary.
+
+There are also some other issues in this design.
+One of these is not checking whether malloc returns a valid address
+to memory when initializing a chunk. If we run out of memory, which
+is a huge possibility with this design, malloc may instead return
+NULL, which we should check for before accessing the memory returned.
+
+Also, another issue is that two extra function calls are necessary if
+a smallobj_alloc is tried, but there is no memory in this chunk left.
+This is because the caller would then have to initialize a chunk as
+well as then call smallobj_alloc again with a new chunk. This would not
+be a problem with the general purpose allocator, as we allocate
+directly from the heap, and when we run out of memory there actually
+is no free  memory left to allocate. However, in this case, we have
+memory left - just not in this chunk.
+
+Finally, this design allows for double free errors, where a small object
+is freed once, and then the same pointer is passed in again. In
+this case, since the allocator does not check if the object has already
+been freed, the count will be incremented, even though this is not a
+newly freed block.
+
+4) The small object allocator would be inefficient in its use of memory
+
+The small object allocator's problem with not reclaiming/reusing
+chunks until they are completely freed will be amplified in this scenario.
+Normally, this would not be too big of a deal, since the objects all have
+similar lifetimes, so they would all be released relatively close in time
+to each other, after which the chunk can either be completely freed
+back to the heap allocator, or the memory can be used. However in this case,
+there is a large chance that the chunks will have a few of the long lived
+objects, which will prevent the whole chunk of memory from being
+reclaimed because of those few. While most of the small objects are not
+being used, the few that have not been released keep the whole chunk
+alive, making the overall memory usage very inefficient. In that case,
+if we need to make more small object allocation requests past some point,
+we will end up having to allocate another chunk, even though this
+chunk has a lot of extra space which just can't be reused yet.
+
+Thus, there would be an issue with running out of memory if we are
+working on a large scale application that performs many dynamic
+memory allocations. Since each chunk is kept alive by a few
+long lived blocks, we will run out of memory faster due to the
+many large (and mostly empty) chunks taking up our memory pool
+and preventing more allocations.
+
+5) To fix the inefficient use of memory problem, we could instead
+reuse the small objects' memories once they are released. By having
+a list of the free small object pointers stored in each chunk, whenever
+an allocation request is made, we can provide memory from the first
+of these reused blocks, or a new one, depending on whichever
+is available. This will still have constant time allocation, as we can
+always just provide the first available reused block (since the objects
+are of the same size). To avoid any fragmentation in this case,
+with the long lived objects fragmenting the chunk, we can have
+a strategy to allocate long lived objects near the end of the chunk
+and all other objects in the front. This way, the long lived objects
+will be confined to one area, and most of the chunk will constantly be
+reused without any fragmentation.
+This will be helpful since it allows for memory to be reused instead of
+wasting mostly empty chunks for a few small long lived objects.
+
+Also, to prevent double free memories, we can also use this explicit free
+list of free blocks in each chunk. However, to solve this issue, it will
+be better to store the free pointers as a tree, for O(log n) time searching.
+This way, whenever we get a small object to be released, we check if
+this object is already in the list. If it is, then we can give an error
+message stating that the object has already been freed and not free it
+again.
+
+To also fix the inefficiency in allocation when the chunk is full, we can
+have two possibilities. One of these is to check that there are no recently
+freed blocks of memory in the chunk that can be reused with our new
+implementation. If this is not the case either, we can instead allocate
+a new chunk in the smallobj_alloc function itself and return a pointer
+to the new small object in that chunk. Since the function returns a
+void pointer anyway, we can change it to return a struct, with the pointer
+to the chunk we allocated in as well as a pointer to the small object.
+This way, we have only one function call to allocate a small object, as
+would be the case in a general purpose allocator.
+
+Finally, the malloc error can be fixed by adding a conditional statement
+after the allocation, checking whether the pointer returned equals NULL, and
+if it is, alerting the caller to that fact.

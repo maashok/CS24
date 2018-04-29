@@ -1,0 +1,52 @@
+Lottery Scheduling
+==================
+
+1) The lottery scheduler will definitely be unfair if any
+process does not receive any lottery tickets at all, since
+that process has a 0% chance of being chosen to run. Also, the
+lottery scheduler will not be very fair if one process
+gets an enormous amount of tickets and another process
+gets one ticket, since the percent chance of the process
+with one ticket winning may essentially be 0%. Thus, we must satisfy
+the basic conditions that each process gets atleast one ticket.
+Also, we can ensure that the ratio of tickets for the process
+with the fewest tickets and that with the most is above some
+fraction, say 1/1,000,000. This way, each process actually
+has a real chance of winning.
+
+2) This can be achieved with the lottery-scheduling mechanism
+by giving the nicer process fewer lottery tickets. This way
+the nicer process has a smaller chance of winning the lottery, and
+will only win once in a while. However, the other process,
+will win the lottery much more and receive CPU time more frequently.
+
+3) A multilevel feedback queue can be approximated through the lottery
+scheduler. Each process will receive its CPU time based on the number
+of tickets it has. A process with more tickets will have less CPU time and
+a process with fewer tickets will have greater CPU time.
+This is because interactive processes generally want the CPU more frequently
+but for less time, whereas compute intensive processes want the CPU
+less frequently but for more time.
+
+Each process will start out having the same large number of lottery tickets.
+However, if the process uses its entire time-slice and is preempted
+by the kernel, its number of lottery tickets is reduced. If the process
+yields to the kernel before its time slice is up, then its number of lottery
+tickets stay the same. However, it stores in a variable in its context of
+the number of times it has blocked or yielded before its time slice ended.
+If a process has blocked or yielded multiple times before, and its counter
+is high, then the process will be given more lottery tickets to increase
+its priority level, and the counter of blocks/yields will be set to zero
+again. Each time the scheduler chooses a process, it merely
+chooses a process randomly, but processes with more tickets (higher priority)
+have a greater chance of winning.
+
+4) There is a chance that the lottery scheduler might still schedule a
+compute intensive task before an interactive task, because even a miniscule
+chance of winning is still a chance. With random picking, there is no way
+to avoid certain processes. This can be avoided by maybe making the compute
+intensive task (those with fewer lottery tickets) win the lottery multiple
+times before they get to run. Thus, the chance of a compute intensive task
+getting CPU time is even lower, while still being greater than zero, making
+the scheduler fair. However, interactive tasks will have more than some
+threshold number of lottery tickets, and only need win once to get CPU time.

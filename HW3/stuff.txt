@@ -1,0 +1,152 @@
+
+/* static unsigned char *freeptr; */
+
+struct freeBlock {
+  int index;
+  int size;
+  struct freeBlock *next;
+  struct freeBlock *previous;
+};
+
+static struct freeBlock *first = NULL;
+
+void deleteNode(struct freeBlock *del) {
+  if (del == NULL) return;
+  if (del->previous == NULL && del->next == NULL) {
+    first = NULL;
+  }
+  else if (del->previous == NULL) {
+    first = del->next;
+    first->previous = NULL;
+  }
+  else if (del->next == NULL) {
+    del->previous->next = NULL;
+  }
+  else {
+    del->previous->next = del->next;
+    del->next->previous = del->previous;
+  }
+  myfree((unsigned char *)del);
+}
+
+void addNode(int ind, int sizeBlock) {
+  struct freeBlock *newNode = (struct freeBlock *)myalloc(sizeof(struct freeBlock));
+  printf("%p\n", newNode);
+  newNode->index = ind;
+  printf("1\n");
+
+  newNode->size = sizeBlock;
+  printf("2\n");
+
+  if (first == NULL) {
+    first = newNode;
+    first->next = NULL;
+    first->previous = NULL;
+    return;
+  }
+  printf("2\n");
+
+  struct freeBlock *find = first;
+  
+  while (find->next != NULL && find->size < sizeBlock) {
+    find = find->next;
+  }
+    printf("3\n");
+
+  if (find->next == NULL) {
+    if(find->size > sizeBlock) {
+      newNode->next = find;
+      newNode->previous = find->previous;
+      find->previous = newNode;
+      find->previous->next = newNode;
+    }
+    else {
+      newNode->next = NULL;
+      newNode->previous = find;
+      find->next = newNode;
+    }      
+  }
+  else {
+    newNode->previous = find->previous;
+    newNode->next = find;
+    find->previous->next = newNode;
+    find->previous = newNode;
+  }
+}
+
+void changeNode(struct freeBlock *change, int newIndex, int newSize) {
+
+  // NEED To check when things are near the beg/end
+  change->index = newIndex;
+  change->size = newSize;
+  while (newSize > change->next->size) {
+    change->next->previous = change->previous;
+    change->previous->next = change->next;
+    change->previous = change->next;
+    change->next = change->previous->next;
+    change->next->previous = change;
+    change->previous->next = change;
+    
+  }
+  while (newSize < change->previous->size) {
+    change->previous->next = change->next;
+    change->next = change->previous;
+    change->previous = change->previous->previous;
+
+    change->previous->next = change;
+
+    change->next->previous = change;
+
+    change->next->next->previous = change->next;
+  }
+}
+
+
+
+
+
+
+
+in init
+    // struct freeBlock *del = first;
+    //  struct freeBlock *nxt;
+    /* while (del != NULL) {
+      nxt = del->next;
+      free(del);
+      del = nxt;
+    }
+    first = NULL;
+    addNode(0, MEMORY_SIZE - 8);*/
+    
+    /* freeptr = mem;*/
+
+
+IN alloc
+
+  //if (first == NULL) return 0;
+  //struct freeBlock *startB = first;
+  // while (startB != NULL && startB->size < size) startB = startB->next;
+  // if (startB == NULL) return 0;
+  
+  // int start = startB->index;
+ 
+  //int origSize = *((int *)(mem + start));
+
+
+  // changeNode(startB, start + size + 8, origSize - size);
+
+    // deleteNode(startB);
+
+
+
+ /*
+    if (freeptr + size < mem + MEMORY_SIZE) {
+        unsigned char *resultptr = freeptr;
+        freeptr += size;
+        return resultptr;
+    }
+    else {
+        fprintf(stderr, "myalloc: cannot service request of size %d with"
+                " %d bytes allocated\n", size, (freeptr - mem));
+        return (unsigned char *) 0;
+	}*/

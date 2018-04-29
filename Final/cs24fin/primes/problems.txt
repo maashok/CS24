@@ -1,0 +1,121 @@
+Sieve of Eratosthenes
+=====================
+
+1.  Brief machine specifications:
+Operating System - Arch Linux (32-bit)
+Base Memory - 2048 MB
+1 Processor
+
+CS 24 Virtual Machine (couldn't run on anything else)
+
+Value of N for running the program:
+N = 4x10^9
+
+Output of "time ./psieve N > /dev/null":
+
+Using maximum value of 4000000000
+
+Total primes found:  189961812
+./psieve 4000000000 > /dev/null  62.12s user 0.15s system 91% cpu 1.07.97 total
+
+Size of bit-vector for N, in bytes:  (show your work)
+
+Find bit index for number N-1 (since N is even)
+B = (P - 3) / 2 = (3,999,999,999 - 3) / 2 = 3,999,999,996 / 2 = 1,999,999,998
+
+Thus, there will be B + 1 (for zero index) bits in the bit vector
+1,999,999,999 bits
+
+8 bits = 1 byte
+
+# bytes = 1,999,999,999 / 8 = 249,999,999.875
+
+There will be 250,000,000 bytes in the bit vector.
+
+2.  Cache performance behavior of prime sieve:
+
+a)  Discussion of stride reference pattern:
+The stride reference pattern in the outer loops is stride-2, as the program
+goes through every odd number until the maximum value. However, while the
+program is looking at numbers less than the square root of the maximum
+value, there is a nested loop with stride-2*p, where p is the number the
+outer loop is at. Thus, the reference pattern of the outer loops
+is constantly stride-2 throughout the entirety of execution. However
+the reference pattern of the nested inner loop varies as the program
+executes, depending on what number the outer loop is examining. As
+we get further along the traversal of the numbers, the stride of the inner
+loop will become larger and larger.
+
+b)  Discussion of locality and cache hits/misses:
+The second loop of the implementation greatly demonstrates good spatial
+locality, since after p > sqrt(max_value), we merely access every bit
+of the bit vector in order. This will greatly leverage the cache, since
+for N = 4 * 10^9, p > 63,245 when it enters this loop, so the bit
+indices to consider run from 31,622 to 1,999,999,998, or 1,999,968,377
+bits in total. This equals 249,996,047 bytes. Since the L2 cache has a total
+of 1MB in space, this will end up with 250 loads into the L2 cache,
+but after each of these loads, 8 million bits can be accessed in sequence
+at the speed of L2 cache. The speed will even be greater than L2 cache
+since 32 KB can fit in the L1 cache at a time, and data can be read
+from that cache if it is already stored there.
+
+There is also spatial locality in the first loop in that the values are
+accessed in order, and for small values of p, this locality is exhibited
+to produce cache-friendly behavior. However, for larger values of p, the
+inner nested loop causes jumps in the bit vector of stride 2*p. If p
+is any larger than 8 million, then each jump will be of size 16 million
+numbers, meaning the bits in the vector will be 8 million bits apart (since
+exclude even numbers). Thus, each jump will be a jump of 1 million
+bytes. Since the size of the L2 cache is 1 million bytes, each loop
+of the inner loop, after p crosses the value 8 million, will result in
+a conflict miss and eviction from the L2 cache, thus reading from much
+slower levels in the memory hierarchy. After p just crosses 256,000 the
+L1 cache will face a conflict miss each time, and the L2 cache must
+be exclusively used, slowing down the program. Good temporal locality
+is also not utilized, since many of the values are accessed multiple
+times, in different traversals of the inner nested loop as p changes
+and also in the second outer loop. However, these accesses generally
+occur far apart from each other (after p grows past a certain point),
+causing temporal locality to not be of any use, as the pages would
+have already been evicted from memory by that point.
+
+Overall, as the program executes, cache-friendliness deteriorates.
+
+3.  Suggestions for improving the sieve's performance:
+
+1) 
+The nested inner loop could be done in groups rather than once
+for each prime p. For example, the inner loop of clearing the bit
+vector index p*p + 2*n*p where n is the number of the inner loop iteration
+could be performed for a group of prime values at the same time. The recent
+primes will just be stored in an array, and after the array reaches
+its capacity, multiples of all the primes in the array will be marked
+as composite, and the array cleared. This way, multiple accesses will be
+done in the same page at relatively close times, increasing spatial
+locality (and perhaps even temporal locality for cases where nearby
+values of p have a common multiple).
+When iterating separately, much of the pages are used
+multiple times, but due to the limited size of the L1 and L2 cache are
+evicted before the next prime value marks its multiples as composite.
+However, by doing group clearing, the same pages can be accessed
+with good use of spatial and temporal locality. While we may
+have extra values that we think are prime but are not, because the
+bit has not been cleared yet, this will lead to more instructions
+executing, but due to the cache friendliness the benefit will outweigh
+the cost. This is also only likely to occur at low values of p, if
+we keep our array relatively small.
+
+2)
+Another modification to the sieve would be to switch the meaning
+of the bits, so that a set bit indicates a composite number, and
+a cleared bit indicates a prime number. In that case, there would
+be no reason to do the call  set_all_bits(&v, 1) since init_bitvector
+itself sets all the bits to zero. By setting all the bits again to
+1, we incur the cost of loading pages into the L1 and L2 caches
+many times, since there are 250 million bytes in the bit vector,
+though the L2 cache itself only holds 1 million bytes. Instead,
+the implementation could change so that primes are represented
+by a zero bit. In that case, in all the checks, get_bitvalue
+should be inverted to get the correct behavior, and composite
+numbers should be set to 1 rather than 0.
+

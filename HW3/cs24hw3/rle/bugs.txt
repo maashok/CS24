@@ -1,0 +1,30 @@
+1) Bug 1 involves adding a 4 byte value to a 1 byte value and then storing
+it in a 1 byte register space. This can cause undefined behavior since
+while we want the top 3 bytes to be zeroed out, we do not know which ones
+actually will be. Thus, it is better to first change the 4 byte value to
+a 1 byte value using the command movz to move it to a register where the
+top 3 bytes are zeroed out. Then, this 1 byte value is added to the 1 byte
+value we are adding to.
+
+2) Bug 2 involves adding only one to the loop index %esi when finding
+the total length of the decoded output. This will not work since the
+number of times each character is repeated is only stored in the even
+indices. If we go through all the indices, we will end up adding the
+values of the characters to the lengths as well, which is not correct.
+This is fixed by just adding 2 to the loop index in each iteration instead
+of just adding 1.
+
+3) Bug 3 involves not saving a caller save register before calling malloc.
+This can cause corruption as we have stored a value in register %ecx
+before, and we would like to use those values later on. However, malloc is
+allowed to change these values as it is not responsible for restoring the
+original values. Thus, we push %ecx onto the stack before pushing the
+number of bytes to allocate, and we pop this value back into the register
+once we have moved the stack pointer back to clean up after the call and
+"remove" %ebx from the stack.
+
+4) Bug 4 involves not incrementing the index responsible for writing to
+the output buffer. If we don't increment %edi, then we will just continually
+write to the same byte in the buffer, instead of writing the correct values
+in different bytes of the buffer. This is fixed by just adding 1 to %edi
+after moving each character to the buffer.

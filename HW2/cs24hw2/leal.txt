@@ -1,0 +1,14 @@
+Instruction			Result
+
+1. leal 6(%eax), %edx					x + 6
+       %eax = x, Move 6 + x into %edx
+2. leal (%eax, %ecx), %edx				x + y
+       %eax = x, %ecx = y, Move x+y into %edx
+3. leal(%eax, %ecx, 4), %edx				x + 4y
+       %eax = x, %ecx = y, Move x + 4*y into %edx
+4. leal 7(%eax, %eax, 8), %edx				7 + 9x
+       %eax = x, Move 7 + x + x*8 = 9x + 7 into %edx
+5. leal 0xA(,%ecx, 4), %edx				10 + 4y
+       %ecx = y, 0xA = 10, Move y*4 + 10 into $edx
+6. leal 9(%eax, %ecx, 2), %edx				9 + x + 2y
+       %eax = x, %ecx = y, Move x + y*2 + 9 into %edx

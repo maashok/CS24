@@ -1,0 +1,111 @@
+Page Replacement Policies and Scan Resistance
+=============================================
+
+
+1
+a) FIFO does not consider frequency of access at all.
+It considers recency of access, in the very unlikely case
+where each page is accessed immediately after it is loaded in,
+and then never again. However, otherwise, FIFO does not consider
+whether the page was used between when it was loaded in
+and then when an eviction occurs. Even if that page was
+the only one used recently for a long time (high frequency
+and high recency), if it was the first page loaded in,
+it will be evicted. Thus, in most cases it does not consider
+recency or frequency.
+
+b) Second Chance/Clock considers recency of access, rather
+than frequency. If the page was accessed some time in between
+the last clock and this one, the page is not evicted. If the
+page was not accessed recently, or if all the pages have been accessed
+since the last eviction then it will be evicted if it is the first
+page not recently accessed (as in FIFO). Thus, the same scenario
+applies where if the page was accessed frequently many times, but
+just not in the last eviction cycle, it can still be evicted if it was
+loaded early on in the process. Frequency of access does not
+play a role in this policy at all, since we do not store how
+many times the page was accessed.
+
+c) Aging considers both frequency and recency of access. This
+is because a higher age (lower age means greater chance of eviction)
+indicates more frequent and recent accesses. This is because for ages
+of identical bit sizes, the topmost bit will be 1 if the page is
+recently accessed (rather than 0 for pages that were not recently accessed).
+Also, more frequently accessed pages will have ages with a greater number
+of ones, as each previous access will have caused the topmost bit at that
+point to be 1. Thus, recent access will cause the topmost bits to be 1,
+and frequent accesses will cause the other bits to be 1, increasing the age
+and reducing its chance for eviction.
+
+2) The Aging policy is mostly not susceptible to scans. This is because
+by the scan is finished, most of the scanned pages will still have a very
+small age (either 1 or 0 (if accessed too far back)), as the 1's from the
+access will have been shifted to the right.
+However, the other pages that are more frequently accessed
+meanwhile, will have higher ages, even if they were not the most recently
+accessed. Their topmost bit may not be 1, but they will have more 1's in
+the less significant bits. However, Aging is slightly susceptible to scans
+for the pages last accessed as part of the scan. This is because those pages
+will have been accessed very recently, and their topmost bit will still be
+1, which makes the ages of these pages very high.
+
+3
+a) The 2Q policy corresponds slightly to LRU-2.
+This policy is similar to LRU-2 in that they both consider the
+frequency and recency of access. However, the 2Q gives more
+weight to the recency of the last access, whereas LRU-2 gives
+more weight to the recency of the second to last access. In 2Q,
+a page recently accessed will be moved to the front of the queue,
+meaning it won't be evicted soon. However, in LRU-2, even if
+a page is very recently used, but its second to last usage was long ago,
+that page is likely to be evicted. Thus, LRU-2 is more geared towards
+differentiating between scans and normal usage, while 2Q is geared
+towards more general usage. Their consideration of frequency of
+access is similar.
+
+b) Two queues will be maintained like in the no-interrupt policy, A1 and Am
+for pages that have been accessed only once and for pages that have
+been accessed more than once, respectively. When a page fault occurs, and
+the number of resident pages equals the total possible number of resident
+pages, the eviction policy should choose the page at the back of A1.
+If A1 is empty, the page at the back of Am should be chosen, and evicted.
+Then, the page that is mapped in should be placed at the front of the
+A1 queue, and the accessed bit is cleared.
+
+At every periodic timer interrupt, the program first traverses the A1 queue
+backwards.
+If any page in the queue has a set accessed bit, the page is removed from the
+A1 queue and placed at the front of the Am queue. This way, the order of the
+A1 queue is preserved in the Am queue. If the accessed bit is not
+set, then the page is not moved. Then, the program traverses the Am queue. If
+the accessed bit is set, the page is moved to the front of the queue, and the
+accessed bit is cleared. This traversal will also proceed backwards, so the
+pages that have been more frequently acccessed in Am (so they are already
+near the front) stay in the front. If the accessed bit is not set, the page
+is not moved.
+
+c) This policy approximates the 2Q algorithm decently well. It follows the
+same design, of maintaining two queues and considering recency and frequency
+of access. However, the problem is that recency and frequency are only
+considered over intervals. There is no way to distinguish between pages that
+were accessed at the very beginning of the clock cycle and those accessed
+near the very end. In the modified policy, they were both accessed equally
+recently. In the same way, frequency is not considered except for across clock
+cycles. There is no difference between a page being accessed 500 times in the
+last clock cycle and just once. However, we do distinguish between pages
+accessed 1 time each over 500 clock cycles, and those accessed only 1 time
+in just one clock cycle.
+
+The modified algorithm can identify page accesses that are part of a scan,
+since they will stay in the A1 queue and be evicted from it, without
+moving to the Am queue.
+It can identify pages that are not part of a scan to a certain extent. If a
+page is accessed many times over multiple times over different clock cycles,
+we can know and move it to the Am queue. The accessed bit is cleared when it
+is first placed in the A1 queue, so any subsequent access in that clock cycle
+itself will allow it to move to the Am queue without being evicted
+immediately. However, if the page is mapped in, but the program has not
+had a chance to access the page again, though it will many times in the
+next clock cycle, the policy does not handle this case. The policy just
+sees that this page has not been accessed after being mapped in, and it
+may evict the page if it was mapped in early enough in the clock cycle.

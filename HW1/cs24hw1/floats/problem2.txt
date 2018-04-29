@@ -1,0 +1,30 @@
+The results for the 3 orders of summation are different due to rounding issues. When
+we have to add floating point numbers that are very far apart in the number line,
+sometimes rounding needs to occur to fit the sum inside the limit of floating point
+size. Thus, the smaller number is sometimes left off as it did not fit in the lower
+limit of the mantissa.
+
+However, if this summation is done in a different order, the sum may be different, as
+we may add enough small numbers first, so that the sum of these becomes large enough
+so that when summed with a large number, no rounding issues will occur. On the other
+hand, if we a bunch of large numbers first, adding a small number to the sum at the
+end probably won't make a difference, as it will be cut off in the rounding to fit
+in the size limit.
+
+Thus, of the three approaches fsum uses, the increasing order of magnitude sum
+is the most accurate, since at first, all the small numbers will be added together,
+in which case there will be no round off errors, as we will be working in a small
+range. As larger numbers are added, the small numbers will have had a chance to sum
+up to large numbers already, so that the sum of the small numbers will not be cut
+off in rounding.
+
+However, large sized inputs that have a large range of numbers, with data 
+concentrated at the extremes of the range, will have large errors regardless 
+of using the most accurate approach. This is because that even when summing 
+the small numbers first, the sum will not be very large. Then, when adding 
+the very large numbers, the sum of the small numbers will be cut off anyway,
+such that we will still have error. Also, a large data set is good since if we only
+have 2 values, there is a larger chance that the data will be far apart, and
+the roundoff is likely to occur. However, with a large data set, there is a larger
+chance of no roundoff happening.
+

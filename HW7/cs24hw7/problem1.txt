@@ -1,0 +1,19 @@
+The consumer only gets the Fibonacci numbers produced by producer 0.
+The consumer never gets Fibonacci numbers produced by producer 1.
+
+For the execution to be fair, all processes should at one point
+receive time on the CPU. However, this will not happen in this
+case because of the cooperative thread execution.
+
+This is because producer 0 initially starts finding Fibonacci
+numbers and adding them to the buffer. Then, the buffer size
+eventually runs out, and producer 0 yields. The next thread
+to get a chance in producer 1. However, there is no more space
+in the buffer, so producer 1 must yield as well. Then, the
+consumer takes the values from the buffer that producer 0 added
+and prints them. However, after the buffer is empty and
+the consumer yields, producer 0 once again gets a chance.
+This sequence continues, with producer 1 only ever getting
+its turn when the buffer is already full and it is forced
+to yield as well. Thus, producer 1 gets some CPU time, but
+it doesn't get to do anything in that time.

@@ -1,0 +1,11 @@
+The program has to cut itself off after reaching max execute time, hinting
+that there is an infinite loop in the program. This is because the remainder
+must steadily decrease (from the dividend) while the quotient increases from 0, until
+the remainder becomes negative. The remainder is changed by subtracting the
+divisor from it each time quotient is incremented (one more of divisor can go
+into dividend). However, if the divisor is zero, each time in our loop, the
+remainder is set to the same value and will never become less than zero to
+break out of the loop. Thus, an infinite loop results, with quotient
+continuously being incremented and remainder staying 10 at all times. This 
+technically makes sense since 10/0 is infinity, and the quotient is
+being incremented towards infinity in this case.

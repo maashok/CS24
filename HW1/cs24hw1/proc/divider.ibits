@@ -1,0 +1,11 @@
+0FB6 # 0. XOR Quotient, Quotient, Quotient   (Set Quotient = 0)
+1237 # 1. OR  Dividend, Quotient, Remainder (Remainder = Dividend)
+0BCF # 2. SUB Remainder, Divisor, Remainder (Remainder = Remainder - Divisor)
+33C2 # 3. SRL Remainder, 1, Tmp1 (Tmp1 = R >> 1 (Logical))
+2FC3 # 4. SRA Remainder, 1, Tmp2 (Tmp2 = R >> 1 (Arithmetic))
+0A9C # 5. SUB Tmp1, Tmp2, Tmp3 (Tmp3 = Tmp1 - Tmp2)
+2909 # 6. BNZ Tmp3, 9 (If Tmp3 != 0, branch to 9 - If so, Remainder < 0)
+1786 # 7. INCR Q, Q (Quotient = Quotient + 1)
+2942 # 8. BNZ 1, 2 (Always branch to 2 (1 != 0))
+03CF # 9. ADD Remainder, Divisor, Remainder (Remainder = Remainder + Divisor)
+3C00 # 10.DONE

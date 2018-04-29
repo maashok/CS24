@@ -1,0 +1,61 @@
+Part 1
+
+IF LIST IS EMPTY
+   RETURN ADDRESS
+
+FIRST = HEAD
+SECOND = HEAD->next
+
+HEAD->next = NULL
+
+WHILE TRUE:
+   SAVE SECOND->next
+   SECOND->next = FIRST
+
+   FIRST = SECOND
+   SECOND = saved SECOND->next
+
+   IF (SECOND == TAIL)
+      BREAK
+   END IF
+
+END WHILE
+
+SWAP HEAD, TAIL
+
+
+Part 2
+
+head = list->head;
+tail = list->tail;
+
+t = (head == NULL);
+if (t)
+   goto Return;
+
+t = (tail == NULL);
+if (t)
+   goto Return;
+
+first = head;
+second = first->next;
+
+head->next = NULL;
+
+Loop:
+   temp = second->next;
+   second->next = first;
+
+   first = second;
+   second = temp;
+
+   t = (second == tail);
+   if (!t)
+      goto Loop;
+
+Done:
+   list->tail = head;
+   list->head = tail;
+
+Return:
+   return

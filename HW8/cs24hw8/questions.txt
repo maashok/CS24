@@ -1,0 +1,58 @@
+Answers to HW8 Questions
+========================
+
+a)  How to detect when a page is accessed?
+You can detect when a page is accessed by setting the access
+permissions to PROT_NONE using mprotect. Then, when any
+access is made, a fault is raised and go to the signal handler.
+In the fault handler, we can then look at the page and know
+that it should not have faulted because it is in virtual
+memory already. Thus, we know that the page must have been
+accessed (This only tells us the first time). Then, we
+can give the page permission to read.
+
+b)  How to detect when a page becomes dirty?
+Similarly, you can detect when a page is accessed by
+setting the access permissions to PROT__READ. Thus, writes
+to the region will cause a segfault. Then, the fault handler
+will analyze this and know that a segfault should not have
+occurred since the page is in memory, and that it instead
+signfies that the page is dirty. Then, the page is given
+permission to write as well.
+
+f)  Page-load rate of "test_matrix -m 1024 1000" using RANDOM policy:
+51,923
+
+g)  Page Replacement Policy #1 (fill in the information below)
+
+Name of policy you chose to implement: FIFO
+
+Below, give the command-line for invoking the matrix-test program for a
+1000x1000 matrix, with a maximum of 1024 resident pages.  (If multiple
+steps are required, list them all here.)
+
+  >>> ./test_matrix_fifo -m 1024 1000
+
+Give the resulting page-load rate of the above command:  47,944
+
+If you have any additional information to share about your policy, please
+share it here.  Please keep your comments brief; you don't need to repeat
+what the assignment says about the policy here.
+
+
+h)  Page Replacement Policy #2 (if you implemented two policies)
+
+Name of policy you chose to implement:  Clock/LRU
+
+Below, give the command-line for invoking the matrix-test program for a
+1000x1000 matrix, with a maximum of 1024 resident pages.  (If multiple
+steps are required, list them all here.)
+
+  >>> ./test_matrix_clru -m 1024 1000
+
+Give the resulting page-load rate of the above command:  6,833
+
+If you have any additional information to share about your policy, please
+share it here.  Please keep your comments brief; you don't need to repeat
+what the assignment says about the policy here.
+

@@ -1,0 +1,15 @@
+Address		Logical Role				Value
+
+0x1008		
+0x1004		Argument 1 of 1st call			3
+0x1000		Return Address to Caller Function	Not known
+0xFFFC		Caller Base Pointer			Not known
+0xFFF8		Argument 1 of 2nd call			2
+0xFFF8		Return Address to fact(3)		0x2030
+0xFFF4		Base Pointer of fact(3)			0xFFFC
+0xFFF0		Argument 1 of 3rd call			1
+0xFFEC		Return Address to fact(2)		0x2030
+0xFFE8		Base Pointer of fact(2)			0xFFE4
+0xFFE4		Argument 1 of 4th call			0
+0xFFE0		Return Address to fact(1)		0x2030
+0xFFDC		Base Pointer of fact(1)			0xFFE8

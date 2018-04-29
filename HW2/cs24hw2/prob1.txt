@@ -1,0 +1,3 @@
+This code first multiplies the value at memory address 8(%ebp) or 8 slots before %ebp times 3, and adds 12 to it. Then this value is multiplied by our original value at the memory address 8(%ebp), and 17 is subtracted from it.
+
+Once simplified, if 8(%ebp) = x, then our code computes 3x^2 + 12x - 17 and stores it in %eax.

@@ -1,0 +1,125 @@
+/*! \file
+ * Implementation of a simple memory allocator.  The allocator manages a small
+ * pool of memory, provides memory chunks on request, and reintegrates freed
+ * memory back into the pool.
+ *
+ * Adapted from Andre DeHon's CS24 2004, 2006 material.
+ * Copyright (C) California Institute of Technology, 2004-2010.
+ * All rights reserved.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "myalloc.h"
+
+
+/*!
+ * These variables are used to specify the size and address of the memory pool
+ * that the simple allocator works against.  The memory pool is allocated within
+ * init_myalloc(), and then myalloc() and free() work against this pool of
+ * memory that mem points to.
+ */
+int MEMORY_SIZE;
+unsigned char *mem;
+
+/*!
+ * This function initializes both the allocator state, and the memory pool.  It
+ * must be called before myalloc() or myfree() will work at all.
+ *
+ * Note that we allocate the entire memory pool using malloc().  This is so we
+ * can create different memory-pool sizes for testing.  Obviously, in a real
+ * allocator, this memory pool would either be a fixed memory region, or the
+ * allocator would request a memory region from the operating system (see the
+ * C standard function sbrk(), for example).
+ */
+void init_myalloc() {
+    /*
+     * Allocate the entire memory pool, from which our simple allocator will
+     * serve allocation requests.
+     */
+    mem = (unsigned char *)malloc(MEMORY_SIZE);
+
+    if (mem == 0) {
+        fprintf(stderr,
+                "init_myalloc: could not get %d bytes from the system\n",
+                MEMORY_SIZE);
+        abort();
+    }
+    *((unsigned short *)(mem + 1)) = (unsigned short)(MEMORY_SIZE - 5);
+    *mem = 0;
+    *((unsigned short *)(mem + MEMORY_SIZE - 2)) = (unsigned short)(MEMORY_SIZE - 5);
+}
+
+int findBestFit(int size) {
+  int start = -1;
+  int i = 0;
+  int startSize = MEMORY_SIZE;
+  while(i < MEMORY_SIZE) {
+    unsigned short thisSize = *((unsigned short *)(mem + i + 1));
+    if (*(mem + i) == 0) {
+      if ((size + 5) < thisSize) {
+	if (thisSize < startSize) {
+	  start = i;
+	  startSize = thisSize;
+	}
+      }
+    }
+    i += thisSize + 5;
+   }
+  return start;
+}
+
+
+/*!
+ * Attempt to allocate a chunk of memory of "size" bytes.  Return 0 if
+ * allocation fails.
+ */
+unsigned char *myalloc(int size) {
+  int start = findBestFit(size);
+  if (start < 0) return 0;
+  unsigned short sizeOrig = *((unsigned short *)(mem + start + 1));
+  if(sizeOrig > 2*size) {
+    unsigned short sizeLeft = (unsigned short)(sizeOrig - size - 6);
+    *((unsigned short *)(mem + start + size + 6)) = sizeLeft;
+    *(mem + start + size + 5) = 0;
+    *((unsigned short *)(mem + start + sizeOrig + 3)) = (unsigned short)sizeLeft;
+    *((unsigned short *)(mem + start + size + 3)) = (unsigned short)size;
+    *((unsigned short *)(mem + start + 1)) = (unsigned short)size;
+  }
+
+  *(mem + start) = 1;
+  return mem + start + 3;
+}
+
+
+/*!
+ * Free a previously allocated pointer.  oldptr should be an address returned by
+ * myalloc().
+ */
+void myfree(unsigned char *oldptr) {
+  unsigned short size = *((unsigned short *)(oldptr - 2));
+  *(oldptr - 3) = 0;
+  unsigned short nextBlockHead = -1;
+  if (mem + MEMORY_SIZE < oldptr + size + 2) {
+    if (*(oldptr + size + 2) == 0) {
+      nextBlockHead = *((unsigned short *)(oldptr + size + 3));
+      *((unsigned short *)(oldptr - 2)) = size + nextBlockHead + 5;
+      *((unsigned short *)(oldptr + size + 5 + nextBlockHead)) = size + nextBlockHead + 5;
+    }
+  }
+/*
+   if (oldptr - 4 > mem) {
+     int prevBlockHead = *(int *)(oldptr - 10 - *((short *)(oldptr - 6)));
+     if (prevBlockHead > 0) {
+       *((int *)(oldptr - 10 - prevBlockHead)) = *((int *)(oldptr - 4)) + prevBlockHead + 6;
+       if (nextBlockHead > 0) {
+	 *((short *)(oldptr + size + 6 + nextBlockHead)) = (short)(*((int *)(oldptr - 4)) + prevBlockHead + 6);
+       }
+       else {
+	 *((short *)(oldptr + size)) = (short)(*((int *)(oldptr - 4)) + prevBlockHead + 6);
+       }
+     }
+     }*/
+}
+

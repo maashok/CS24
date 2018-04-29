@@ -1,0 +1,112 @@
+#include "cmp_swap.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+/* Will test the two cases where compare_and_swap
+ * should be successful and when it should not
+ * be successful
+ */
+int main() {
+      uint32_t *target = malloc(sizeof(uint32_t));
+      *target = 5;
+      uint32_t old_value = 3;
+      uint32_t new_value = 4;
+
+      int fail = 0;
+      
+      /* Test when target != old_value */
+      printf("Testing case where compare and swap shouldn't be successful\n");
+      int ret = compare_and_swap(target, old_value, new_value);
+
+      /* The function should return 0 since the compare and swap failed */
+      printf("Testing return value\n");
+      printf("The return value of compare and swap: %d\n", ret);
+      if (ret == 1) {
+            printf("The test FAILED.");
+            printf("Should have returned 0, as no swap was performed\n");
+            fail = 1;
+      }
+      else {
+            printf("The test PASSED. The return value is correct\n");
+      }
+      
+      /* Target should still equal 5, since the compare and swap failed */
+      printf("Testing value of target variable\n");
+      printf("The final value of target: %d\n", *target);
+      if (*target != 5) {
+            printf("The test FAILED. Target should not have changed");
+            fail = 1;
+      }
+      else {
+            printf("The test PASSED. Target is still unchanged\n");
+      }
+
+      /* The old and new values should still be the same */
+      if (old_value == 3 && new_value == 4) {
+            printf("The test PASSED. Values of old and new are unchanged\n");
+      }
+      if (old_value != 3) {
+            printf("The test FAILED. The value of old changed\n");
+            fail = 1;
+      }
+      if (new_value != 4) {
+            printf("The test FAILED. The value of new changed\n");
+            fail = 1;
+      }
+
+      
+      /* Now, change the old_value to match target, so the compare and swap
+       * should succeed */
+      old_value = 5;
+
+      printf("\n");
+      printf("Testing case where compare and swap should  be successful\n");
+      ret = compare_and_swap(target, old_value, new_value);
+
+      /* Now the return value should be 1, since it should have worked */
+      printf("Testing return value\n");
+      printf("The return value of compare and swap: %d\n", ret);
+      if (ret == 1) {
+            printf("The test PASSED. The return value is correct\n");
+      }
+      else {
+            printf("The test FAILED. Should have returned 1\n");
+            fail = 1;
+      }
+
+      /* And target should change to new_value, since it should not fail */
+      printf("Testing value of target variable\n");
+      printf("The final value of target: %d\n", *target);
+      if (*target == 4) {
+            printf("The test PASSED. Target changed to the new value\n");
+      }
+      else {
+            printf("The test FAILED. Target is not the value of new\n");
+            fail = 1;
+      }
+
+      /* The old and new values should still be the same */
+      if (old_value == 5 && new_value == 4) {
+            printf("The test PASSED. Values of old and new are unchanged\n");
+      }
+      if (old_value != 5) {
+            printf("The test FAILED. The value of old changed\n");
+            fail = 1;
+      }
+      if (new_value != 4) {
+            printf("The test FAILED. The value of new changed\n");
+            fail = 1;
+      }
+
+      free(target);
+
+      /* Determine if all tests passed */
+      if (!fail) {
+            printf("\nSUCCESS: All tests completed as expected\n");
+      }
+      else {
+            printf("\nFAILURE: Not all tests completed as expected\n");
+      }
+
+      return 0;
+}
